@@ -1,0 +1,136 @@
+.TH ATTACH 5 
+.SH NAME
+attach, session, nop \- messages to initiate activity
+.SH SYNOPSIS
+.ta \w'\fLTsession 'u
+.B Tnop	
+.IR tag [2]
+.br
+.B Rnop	
+.IR tag [2]
+.PP
+.B
+Tsession	
+.IR tag [2]
+.IR chal [8]
+.br
+.B
+Rsession	
+.IR tag [2]
+.IR chal [8]
+.IR authid [28]
+.IR authdom [48]
+.PP
+.B
+Tattach	
+.IR tag [2]
+.IR fid [2]
+.IR uid [28]
+.IR aname [28]
+.IR ticket [72]
+.IR auth [13]
+.br
+.B
+Rattach	
+.IR tag [2]
+.IR fid [2]
+.IR qid [8]
+.IR rauth [13]
+.SH DESCRIPTION
+The
+.B nop
+request does nothing overt but may be used to synchronize the
+channel between two service hosts initially.
+.PP
+The
+.B session
+request is used to initialize a connection between a client and a server.
+All outstanding I/O on the connection is aborted.
+The set of messages between
+.B session
+requests is called a
+.IR session .
+The host's user name
+.RI ( authid )
+and its authentication domain 
+.RI ( authdom )
+identify the key to be used when authenticating to this host.
+The exchanged challenges
+.RI ( chal )
+are used in the authentication algorithm.
+If
+.I authid
+is a null string no authentication is performed in this session.
+.PP
+The
+.I tag
+should be
+.B NOTAG
+(value
+.BR 0xFFFF )
+for a
+.B nop
+or
+.B session
+message.
+.PP
+The
+.B attach
+message serves as a fresh introduction from a user on
+the client machine to a server.
+The message identifies the user
+.RI ( uid )
+and may select
+the file tree to access
+.RI ( aname ).
+The
+.I ticket
+and
+.I auth
+arguments contains authorization data
+derived from the exchanged challenges
+of the
+.B session
+message; see
+.IR auth (6).
+.PP
+As a result of the
+.B attach
+transaction, the client will have a connection to the root
+directory of the desired file tree,
+represented by
+.IR fid .
+An error is returned if
+.I fid
+is already in use.
+The server's idea of the root of the file tree is represented by the returned
+.BR qid .
+.SH ENTRY POINTS
+An
+.B attach
+transaction will be generated for kernel devices
+(see
+.IR intro (3))
+when a system call evaluates a file name
+beginning with
+.LR # .
+.IR Pipe (2)
+generates an attach on the kernel device
+.IR pipe (3).
+The
+.I mount
+system call
+(see
+.IR bind (2))
+generates an
+.B attach
+messages to the remote file server.
+When the kernel boots, an
+.I attach
+is made to the root device,
+.IR root (3),
+and then an
+.B attach
+is made to the requested file server machine.
+.SH SEE ALSO
+.IR auth (6)

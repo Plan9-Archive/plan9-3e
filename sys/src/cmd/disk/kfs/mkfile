@@ -1,0 +1,39 @@
+</$objtype/mkfile
+
+TARG=kfs
+
+OFILES=\
+	fs.$O\
+	sub.$O\
+	porttime.$O\
+	fcall.$O\
+	iobuf.$O\
+	dat.$O\
+	main.$O\
+	dentry.$O\
+	fcallconv.$O\
+	ialloc.$O\
+	misc.$O\
+	con.$O\
+	console.$O\
+	chk.$O\
+	uid.$O\
+	auth.$O\
+
+HFILES=\
+	all.h\
+	dat.h\
+	errno.h\
+	fns.h\
+	lib.h\
+	portfns.h\
+	portdat.h\
+
+BIN=/$objtype/bin/disk
+
+</sys/src/cmd/mkone
+
+$O.out:	devwren.$O
+
+$O.gfs:	$OFILES devmulti.$O
+	$LD $LDFLAGS -o $target $prereq

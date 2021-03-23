@@ -1,0 +1,10 @@
+</$objtype/mkfile
+
+TARG=iostats
+OFILES=iostats.$O\
+	statsrv.$O\
+
+HFILES=statfs.h\
+
+BIN=/$objtype/bin
+</sys/src/cmd/mkone

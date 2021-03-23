@@ -1,0 +1,106 @@
+.TH EXPORTFS 4
+.SH NAME
+exportfs, srvfs \- network file server plumbing
+.SH SYNOPSIS
+.B exportfs
+[
+.B -asF
+] [
+.B -r
+.I root
+]
+.PP
+.B srvfs
+[
+.B -p
+.I perm
+]
+.I name
+.I dir
+.SH DESCRIPTION
+.I Exportfs
+is a user level file server that allows Plan 9 compute servers, rather
+than file servers, to export portions of a name space across networks.
+The service is started either by the
+.IR cpu (1)
+command or by a network listener process.  An initial protocol
+establishes a root directory for the exported name space.
+The
+connection to
+.I exportfs
+is then mounted, typically on
+.BR /mnt/term .
+.I Exportfs
+then acts as a relay file server: operations in the imported file
+tree are executed on the remote server and the results returned.  This
+gives the appearance of exporting a name space from a remote machine
+into a local file tree.
+.PP
+The 
+.B -r
+option bypasses the initial protocol, instead immediately
+serving the namespace rooted at 
+.IR root .
+The
+.B -s
+option is equivalent to
+.B -r 
+.BR / ,
+but predates
+.B -r
+and remains for compatibility.
+.PP
+The
+.B -a
+option instructs
+.I exportfs
+to authenticate the user, usually because it is
+being invoked from a remote machine.
+.PP
+The
+.B -F
+option causes
+.I exportfs
+to push the
+.I fcall
+line discipline on its network connection.  This option is intended for networks that do not
+preserve read/write boundaries.
+.PP
+The
+.B cpu
+command uses
+.I exportfs
+to serve device files in the terminal.  The
+.IR import (4)
+command calls
+.I exportfs
+on a remote machine, permitting users to access arbitrary pieces of
+name space on other systems.
+.PP
+.I Srvfs
+uses
+.I exportfs
+to create a mountable file system from a name space: a subsequent
+.I mount
+(see
+.IR bind (1))
+of
+.BI /srv/ name ,
+which is created with mode
+.I perm
+(default 0600),
+will reproduce the name space rooted at
+.IR dir .
+One might use
+.I srvfs
+to enable mounting of an FTP file system (see
+.IR ftpfs (4))
+in several windows, or to publish a
+.B /proc
+(see
+.IR proc (3))
+with a broken process so a remote person may debug the program.
+.SH SOURCE
+.B /sys/src/cmd/exportfs
+.br
+.B /sys/src/cmd/srvfs.c

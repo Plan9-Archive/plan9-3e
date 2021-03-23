@@ -1,0 +1,30 @@
+</$objtype/mkfile
+
+LIB=/$objtype/lib/libthread.a
+# LIB=libthread.a
+
+OFILES=\
+	thread.$O\
+	channel.$O\
+	assert.$O\
+	ref.$O\
+	xinc$objtype.$O\
+
+HFILES=\
+	/sys/include/thread.h\
+	threadimpl.h\
+	assert.h\
+
+all:V:	$LIB syms
+
+< /sys/src/cmd/mksyslib
+
+CFLAGS = $CFLAGS -DM$objtype
+
+syms:V: threadimpl.h
+	$CC -a thread.c	>syms.$objtype
+	$CC -a channel.c >>syms.$objtype
+
+assert.$O: assert.h threadimpl.h
+channel.$O: assert.h threadimpl.h
+thread.$O: assert.h threadimpl.h

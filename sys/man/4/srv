@@ -1,0 +1,137 @@
+.TH SRV 4 
+.SH NAME
+srv, 9fs \- start network file service
+.SH SYNOPSIS
+.B srv
+[
+.B -abcCmqr
+]
+.RI [ net !] system\c
+.RI [! service ]
+[
+.I srvname
+[
+.I mtpt
+] ]
+.PP
+.B 9fs
+.RI [ net !] system
+.RI [ mountpoint ]
+.SH DESCRIPTION
+.I Srv
+dials the given machine and initializes the connection to serve the
+9P protocol.
+It then creates in
+.B /srv
+a file named
+.IR srvname .
+Users can then
+.B mount
+(see
+.IR bind (1))
+the service, typically on a name in
+.BR /n ,
+to access the files provided by the remote machine.
+If
+.I srvname
+is omitted, the first argument to
+.B srv
+is used.
+Option
+.B m
+directs
+.I srv
+to mount the service on
+.BI /n/ system
+or onto
+.I mtpt
+if it is given.
+Option
+.B q
+suppresses complaints if the
+.B /srv
+file already exists.
+The 
+.BR a ,
+.BR b ,
+.BR c ,
+and
+.B C 
+flags are used to control the mount flag as in
+.IR bind (1).
+.PP
+The specified
+.I service
+must serve 9P.  Usually
+.I service
+can be omitted; when calling some
+non-Plan 9 systems, a
+.I service
+such as
+.B u9fs
+must be mentioned explicitly.
+.PP
+The
+.I 9fs
+command does the
+.I srv
+and the
+.I mount
+necessary to make available the files of
+.I system
+on network
+.IR net .
+The files are mounted on
+.IR mountpoint ,
+if given;
+otherwise they are mounted on
+.BI /n/ system\f1.
+If
+.I system
+contains
+.L /
+characters, only the last element of
+.I system
+is used in the
+.B /n
+name.
+.PP
+.I 9fs
+recognizes some special names, such as
+.B dump
+to make the dump file system available on
+.BR /n/dump .
+.I 9fs
+is an
+.IR rc (1)
+script; examine it to see what local conventions apply.
+.SH EXAMPLES
+To see kremvax's and deepthought's files in
+.B /n/kremvax
+and
+.BR /n/deepthought :
+.IP
+.EX
+9fs kremvax
+9fs hhgttg/deepthought
+.EE
+.SH NOTE
+The TCP port used for 9P is 564.
+.SH FILES
+.TF /srv/*
+.TP
+.B /srv/*
+ports to file systems and servers posted by
+.I srv
+and
+.I 9fs
+.SH SOURCE
+.B /sys/src/cmd/srv.c
+.br
+.B /rc/bin/9fs
+.br
+.SH "SEE ALSO"
+.IR bind (1),
+.IR dial (2),
+.IR srv (3),
+.IR ftpfs (4)

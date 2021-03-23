@@ -1,0 +1,362 @@
+.TH AUTH 2
+.SH NAME
+auth, amount, srvauth, authnonce, srvauthnonce, authenticate, getchal, chalreply, vncchal, vncreply, apopchal, apopreply, cramchal, cramreply,  newns, addns, authdial, passtokey, nvcsum, convT2M, convM2T, convTR2M, convM2TR, convA2M, convM2A, convPR2M, convM2PR, login, httpauth, noworld \- network authentication
+.SH SYNOPSIS
+.nf
+.PP
+.ft L
+#include <u.h>
+#include <libc.h>
+#include <auth.h>
+.fi
+.PP
+.ft P
+.B
+int	auth(int fd)
+.PP
+.B
+int	srvauth(int fd, char *user)
+.PP
+.B
+int	authnonce(int fd, uchar nonce[8])
+.PP
+.B
+int	srvauthnonce(int fd, char *user, uchar nonce[8])
+.PP
+.B
+int	getchal(Chalstate *c, char *user)
+.PP
+.B
+int	chalreply(Chalstate *c, char *response)
+.PP
+.B
+int	vncchal(VNCchalstate *c, char *user)
+.PP
+.B
+int	vncreply(VNCchalstate *c, uchar *response)
+.PP
+.B
+int	apopchal(Apopchalstate *c, char *user)
+.PP
+.B
+int	apopreply(Apopchalstate *c, char *response)
+.PP
+.B
+int	cramchal(Cramchalstate *c, char *user)
+.PP
+.B
+int	cramreply(Cramchalstate *c, char *response)
+.PP
+.B
+int	newns(char *user, char *nsfile)
+.PP
+.B
+int	addns(char *user, char *nsfile)
+.PP
+.B
+int	authdial(char *service)
+.PP
+.B
+int	passtokey(char key[DESKEYLEN], char *password)
+.PP
+.B
+uchar	nvcsum(void *mem, int len)
+.PP
+.B
+int	authenticate(int fd, int afd)
+.PP
+.B
+int	amount(int fd, char *old, int flag, char *aname)
+.PP
+.B
+int	convT2M(Ticket *t, char *msg, char *key)
+.PP
+.B
+void	convM2T(char *msg, Ticket *t, char *key)
+.PP
+.B
+int	convA2M(Authenticator *a, char *msg, char *key)
+.PP
+.B
+void	convM2A(char *msg, Authenticator *a, char *key)
+.PP
+.B
+int	convTR2M(Ticketreq *tr, char *msg)
+.PP
+.B
+void	convM2TR(char *msg, Ticketreq *tr)
+.PP
+.B
+int	convPR2M(Passwordreq *pr, char *msg, char *key)
+.PP
+.B
+void	convM2PR(char *msg, Passwordreq *pr, char *key)
+.PP
+.B
+void	login(char *user, char *password, char *namespace)
+.PP
+.B
+int	httpauth(char *realm, char *password);
+.PP
+.B
+int	noworld(char *user);
+.SH DESCRIPTION
+These functions perform the authentication protocol as described in
+.IR auth (6)
+for programs such as
+.IR cpu (1),
+.IR import (4), 
+etc.
+.PP
+.I Auth
+and
+.I srvauth
+authenticate connections for Plan 9 remote execution
+using the
+.B rexauth
+protocol described in
+.IR auth (6).
+.I Auth
+is run by the caller and
+.I srvauth
+by the server;
+both return 0 if successful and
+-1 on error.
+.I Fd
+is a file descriptor to the data channel.
+.PP
+.I Srvauth
+authenticates the corresponding incoming call.
+It copies the name of the user into
+.IR user ,
+which must be at least
+.B NAMELEN
+bytes long.
+.PP
+.I Authnonce
+and
+.I srvauthnonce
+are versions of
+.I auth
+and
+.I srvauth
+that return an 8 byte nonce key.
+The key is a DES key and hence has only 56 bits
+of random data, the other 8 being parity bits.
+.PP
+.I Getchal
+and
+.I chalreply
+authenticate an incoming network call for a service that does not
+perform the usual Plan 9 authentication.
+They use the
+.I chal
+protocol described in
+.IR auth (6).
+.I User
+points to the local name of the user.
+.I Getchal
+reads a null-terminated textual challenge from the authentication server and copies it to
+.IB c -> chal\f1.
+It returns 0 if it reaches the authentication server
+or \-1 if it fails.
+The challenge should be printed for the user to see,
+and the user should use a Digital Pathways SecureNet Key or
+.I netkey
+(see
+.IR passwd (1))
+to generate the appropriate response.
+.PP
+.I Chalreply
+should be called with the user's response, which is also a null-terminated text string.
+It returns 0 if it succeeds,
+or \-1 if the user was not authenticated.
+.PP
+.IR Vncchal ,
+.IR vncreply ,
+.IR apopchal ,
+.IR apopreply ,
+.IR cramchal ,
+and
+.I cramreply
+are similar to
+.I getchal
+and
+.I chalreply
+and are used much the same way.
+The only differences are when the user name is known (before
+or after the challenge) and the format of the challenges and
+replies.
+They negotiate the challenge/reply protocols for VNC, APOP (RFC1939), and CRAM (RFC2195)
+authentication.
+They use the user's APOP secret which is different than his Plan 9
+password or SecureNet Key.
+.PP
+.IR Srvauth ,
+.IR chalreply ,
+.IR vncreply ,
+.IR apopreply ,
+and
+.I cramreply
+set the process's user name (see
+.IR cons (3)).
+.PP
+.I Vncchal
+and
+.I vncreply
+depend on changes currently being requested for the VNC
+authentication protocol.  Thus, they may be subject to
+change once the protocol is tied down.
+.PP
+.I Newns
+builds a name space for
+.IR user .
+It opens the file
+.I nsfile
+.RB ( /lib/namespace
+is used if
+.I nsfile
+is null),
+copies the old environment, and erases the current name space,
+sets the environment variables
+.B user
+and
+.BR home ,
+and interprets the commands in
+.IR nsfile .
+The format of
+.I nsfile
+is described in
+.IR namespace (6).
+.PP
+.I Addns
+also interprets and executes the commands in
+.IR nsfile .
+Unlike
+.I newns
+is applies the command to the current name space
+rather than starting from scratch.
+.PP
+.I Authdial
+calls
+.I service
+on the local authentication server.
+It returns a file descriptor to the open connection
+or \-1 if it fails.
+.I Authdial
+is used to implement many of the other functions here;
+it is not normally called by users.
+.PP
+.I Passtokey
+converts
+.I password
+into a DES key and stores the result in
+.IR key .
+It returns 0 if
+.I password
+could not be converted,
+and 1 otherwise.
+.PP
+.I Nvcsum
+computes a checksum for the 
+.I len
+byte array
+.IR mem .
+It is used to checksum keys stored in non-volatile RAM.
+.PP
+.I Authenticate
+performs authentication to a file server at the other end of
+the channel referenced by
+.IR fd .
+If
+.I afd
+is greater than or equal to zero and the
+authentication requires calling the authentication server then
+.I afd
+is used as a channel to it.
+Otherwise,
+.I authenticate
+dials the authentication server using
+.IR authdial ().
+.PP
+.I Amount
+is like
+.I mount
+but performs authentication on
+.IR fd .
+It should be used instead of
+.I mount
+whenever the file server being mounted requires authentication.
+See
+.IR bind (2)
+for a definition of the arguments to
+.I mount
+and
+.IR amount .
+.PP
+.IR ConvT2M ,
+.IR convA2M ,
+.IR convTR2M ,
+and
+.I convPR2M
+convert tickets, authenticators, ticket requests, and password change request
+structures into transmittable messages.
+.IR ConvM2T ,
+.IR convM2A ,
+.IR convM2TR ,
+and
+.I convM2PR
+are used to convert them back.
+.I Key
+is used for encrypting the message before transmission and decrypting
+after reception.
+These routines are used by the others to communicate with the
+authentication server.
+.PP
+.I Login
+changes the the account the process is running as to
+.I user
+and recreates the namespace using the file
+.I namespace
+(default
+.BR /lib/namespace ).
+It does this by negotiating with the authentication server using
+.I password
+to encrypt the exchange.
+.PP
+.I Httpauth
+check a password for an HTTP page.  The
+.I realm
+identifies the password to check for.
+Like
+.IR login ,
+it does this by negotiating with the authentication server using
+.I password
+to encrypt the exchange.
+.I Httpauth
+returns 0 on success and \-1 on failure.
+.PP
+.I Noworld
+returns 1 if the user is in the group
+.B noworld
+in
+.BR /adm/users .
+Otherwise, it returns 0.
+.SH FILES
+.TF /lib/namespacexxx
+.PD
+.TP
+.B /lib/namespace
+Default name space specification file.
+.SH SOURCE
+.B /sys/src/libauth
+.SH SEE ALSO
+.IR passwd (1),
+.IR auth (6),
+.IR cons (3),
+.IR dial (2),
+.IR auth (8)
+.SH DIAGNOSTICS
+These routines set
+.IR errstr .
+Integer-valued functions return -1 on error.

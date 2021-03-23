@@ -1,0 +1,29 @@
+# root
+mount -aC #s/boot /root $rootspec
+bind -a $rootdir /
+
+# kernel devices
+bind #c /dev
+bind #d /fd
+bind -c #e /env
+bind #p /proc
+bind -c #s /srv
+
+# standard bin
+bind /$cputype/bin /bin
+bind -a /rc/bin /bin
+
+# networks
+bind -a #l /net
+bind -a #I /net
+mount -a /srv/cs /net
+mount -a /srv/dns /net
+mount -a /srv/net /net
+bind -a #D /net
+
+# mail has to be uncached
+mount -c #s/boot /n/termrc.tmp
+bind -c /n/termrc.tmp/mail /mail
+
+bind -c /usr/$user/tmp /tmp
+cd /usr/$user

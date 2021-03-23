@@ -1,0 +1,13 @@
+</$objtype/mkfile
+
+LIB=/$objtype/lib/libip.a
+OFILES = eipconv.$O\
+	parseip.$O\
+	parseether.$O\
+	myetheraddr.$O\
+	classmask.$O\
+	bo.$O\
+	readipifc.$O\
+	ipaux.$O\
+
+</sys/src/cmd/mksyslib

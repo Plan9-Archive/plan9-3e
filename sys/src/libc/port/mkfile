@@ -1,0 +1,113 @@
+</$objtype/mkfile
+
+LIB=/$objtype/lib/libc.a
+ALLOFILES=\
+	_assert.$O\
+	abs.$O\
+	asin.$O\
+	atan.$O\
+	atan2.$O\
+	atexit.$O\
+	atnotify.$O\
+	atof.$O\
+	atol.$O\
+	atoll.$O\
+	charstod.$O\
+	cistrcmp.$O\
+	cistrncmp.$O\
+	cistrstr.$O\
+	cleanname.$O\
+	crypt.$O\
+	ctype.$O\
+	doprint.$O\
+	execl.$O\
+	exp.$O\
+	fabs.$O\
+	fastrand.$O\
+	fltconv.$O\
+	floor.$O\
+	fmod.$O\
+	frexp.$O\
+	getcallerpc.$O\
+	getfields.$O\
+	hangup.$O\
+	hypot.$O\
+	lock.$O\
+	log.$O\
+	malloc.$O\
+	memccpy.$O\
+	memchr.$O\
+	memcmp.$O\
+	memmove.$O\
+	memset.$O\
+	mktemp.$O\
+	muldiv.$O\
+	nan.$O\
+	netcrypt.$O\
+	netmkaddr.$O\
+	perror.$O\
+	pool.$O\
+	pow.$O\
+	pow10.$O\
+	print.$O\
+	printquote.$O\
+	profile.$O\
+	qsort.$O\
+	quote.$O\
+	rand.$O\
+	readn.$O\
+	rune.$O\
+	runestrcat.$O\
+	runestrchr.$O\
+	runestrcmp.$O\
+	runestrcpy.$O\
+	runestrecpy.$O\
+	runestrdup.$O\
+	runestrncat.$O\
+	runestrncmp.$O\
+	runestrncpy.$O\
+	runestrrchr.$O\
+	runestrlen.$O\
+	runestrstr.$O\
+	runetype.$O\
+	sin.$O\
+	sinh.$O\
+	sqrt.$O\
+	strcat.$O\
+	strchr.$O\
+	strcmp.$O\
+	strcpy.$O\
+	strecpy.$O\
+	strcspn.$O\
+	strdup.$O\
+	strlen.$O\
+	strncat.$O\
+	strncmp.$O\
+	strncpy.$O\
+	strpbrk.$O\
+	strrchr.$O\
+	strspn.$O\
+	strstr.$O\
+	strtod.$O\
+	strtok.$O\
+	strtol.$O\
+	strtoll.$O\
+	strtoul.$O\
+	strtoull.$O\
+	tan.$O\
+	tanh.$O\
+	tokenize.$O\
+	toupper.$O\
+	utflen.$O\
+	utfnlen.$O\
+	utfrune.$O\
+	utfrrune.$O\
+	utfutf.$O\
+
+# cull things in the per-machine directories from this list
+OFILES=	`{rc ./reduce $O $objtype $ALLOFILES}
+
+HFILES=/sys/include/libc.h
+
+</sys/src/cmd/mksyslib
+

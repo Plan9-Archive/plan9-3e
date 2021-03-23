@@ -1,0 +1,123 @@
+#!/bin/rc
+view=no
+stdin=no
+
+switch($1){
+case -v
+	view=yes
+	shift
+}
+
+switch($#*){
+case 0 1
+	echo usage: $0 telephone-number recipient [files]
+	exit 0
+case 2
+	stdin=yes
+}
+
+telno=$1
+shift
+
+switch($telno){
+case [0-9]*
+	;
+case *
+	echo usage: $0 telephone-number recipient [files]
+	exit 0
+}
+
+switch($telno){
+case ???????
+	telno='*9,'^$telno
+case ??????????
+	telno='*9,1'^$telno
+case 1??????????
+	telno='*9,'^$telno
+case 011*
+	telno='*9,'^$telno
+case +*
+	telno=`{echo $telno | sed 's/\+/*9,011/'}
+}
+
+recip=$1
+shift
+
+script=/tmp/fax.$pid
+header=/tmp/faxh.$pid
+user=`{cat /dev/user}
+tmp=/tmp/fax.g3.$pid
+tmpin=/tmp/fax.in.$pid
+tmpps=/tmp/fax.ps.$pid
+tel=`{grep '\) '$user /lib/tel}
+myname=`{echo $tel | sed 's/ \(.*//'}
+ext=`{echo $tel | sed 's/.*\) [^ ]* [^ ]* ([^ ]*).*/\1/'}
+
+fn sigint{
+	rm -f $tmp.* $script $header $header.* $tmpin $tmpps
+	exit interrupt
+}
+
+# gather input into a file
+switch($stdin){
+case yes
+	cat > $tmpin
+	infiles=$tmpin
+case *
+	infiles=($*)
+}
+
+# convert to g3
+switch(`{file $infiles(1)}){
+case *g3* *fax*
+	g3files=$infiles
+case postscript
+	gs -dSAFER '-sDEVICE=dfaxlow' '-sOUTPUTFILE='$tmp'.%03d' -dNOPAUSE -dQUIET $infiles quit.ps
+	g3files=($tmp.*)
+case *
+	lp -dstdout $infiles > $tmpps
+	gs -dSAFER '-sDEVICE=dfaxlow' '-sOUTPUTFILE='$tmp'.%03d' -dNOPAUSE -dQUIET $tmpps quit.ps
+	g3files=($tmp.*)
+}
+
+pages=`{echo $g3files|wc -w}
+
+echo -n 's/FAXddd/' > $script
+echo -n `{date}>> $script
+echo />> $script
+echo -n s/FAXFFF/>> $script
+echo -n $myname >>  $script
+echo />> $script
+echo -n s/FAXEEE/>> $script
+echo -n $user >>  $script
+echo />> $script
+echo -n s/FAXVVV/>> $script
+echo -n $ext >>  $script
+echo />> $script
+echo -n s/FAXTTT/>> $script
+echo -n $recip >>  $script
+echo />> $script
+echo -n s/FAXfff/>> $script
+echo -n $telno >>  $script
+echo />> $script
+echo -n s/FAXPPP/>> $script
+echo -n $pages >>  $script
+echo />> $script
+sed -f $script /sys/lib/fax/h.ps > $header
+
+gs -dSAFER '-sDEVICE=dfaxlow' '-sOUTPUTFILE='$header'.%03d' -dNOPAUSE -dQUIET $header quit.ps
+
+files=()
+for(i in $header.* $g3files){
+	files=($files -f $i)
+}
+
+switch($view){
+case no
+	upas/qer $files /mail/faxoutqueue fax $user $telno < /dev/null
+	rx dinar /sys/lib/fax/faxgoose
+case yes
+	page $header.* $g3files
+}
+
+#rm -f $tmp.* $script $header $header.* $tmpin $tmpps

@@ -1,0 +1,16 @@
+
+RCFILES=mail.rc\
+
+all:Q:
+	;
+
+installall:Q:	install
+	;
+
+install:V:
+	cp mail.rc /rc/bin/mail
+
+clean:Q:
+	;
+nuke:V:
+	rm /rc/bin/mail

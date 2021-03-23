@@ -1,0 +1,25 @@
+</$objtype/mkfile
+
+
+LIB=../lib.$O.a
+OFILES=\
+	keyconv.$O\
+	netcheck.$O\
+	okpasswd.$O\
+	readwrite.$O\
+	readarg.$O\
+	readln.$O\
+	getauthkey.$O\
+	log.$O\
+	error.$O\
+	fs.$O\
+	rdbio.$O\
+	querybio.$O\
+	wrbio.$O\
+	getexpiration.$O\
+
+
+HFILES=/sys/include/auth.h
+
+</sys/src/cmd/mksyslib
+CFLAGS=-w -I..
